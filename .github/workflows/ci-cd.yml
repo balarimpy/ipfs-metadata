@@ -55,6 +55,8 @@ jobs:
         docker tag ipfs-metadata:latest ${{ steps.ecr-login.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
         docker push ${{ steps.ecr-login.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
 
+    - name: Update kube config
+      run: aws eks update-kubeconfig --name ipfs-cluster      
 
     - name: Deploy to Kubernetes
       env:
