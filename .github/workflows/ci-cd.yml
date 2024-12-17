@@ -49,10 +49,10 @@ jobs:
         ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
         IMAGE_TAG: latest
       run: |
-        echo "Building Docker image ipfs-metadata:${IMAGE_TAG}"
-        docker build -t ipfs-metadata:${IMAGE_TAG} -f Dockerfile .
+        echo "Building Docker image ipfs:${IMAGE_TAG}"
+        docker build -t ipfs:${IMAGE_TAG} -f Dockerfile .
         echo "Tagging Docker image"
-        docker tag ipfs-metadata:latest ${{ steps.ecr-login.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
+        docker tag ipfs:latest ${{ steps.ecr-login.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
         docker push ${{ steps.ecr-login.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
 
     - name: Update kube config
@@ -66,5 +66,5 @@ jobs:
       run: |
         echo "Updating 2 Kubernetes deployment with image $ECR_REGISTRY/$ECR_REPOSITORY:${IMAGE_TAG}"
         aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ steps.ecr-login.outputs.registry }}
-        kubectl set image deployment/ipfs-metadata ipfs-metadata=${{ steps.ecr-login.outputs.registry }}/ipfs:latest
-        kubectl rollout restart deployment ipfs-metadata        
+        kubectl set image deployment/ipfs ipfs=${{ steps.ecr-login.outputs.registry }}/ipfs:latest
+        kubectl rollout restart deployment ipfs        

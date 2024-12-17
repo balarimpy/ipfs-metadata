@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ipfs-metadata
+  name: ipfs
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: ipfs-metadata
+      app: ipfs
   template:
     metadata:
       labels:
-        app: ipfs-metadata
+        app: ipfs
     spec:
       containers:
-      - name: ipfs-metadata
+      - name: ipfs
         image: 339713100066.dkr.ecr.us-east-1.amazonaws.com/ipfs:latest
         ports:
         - containerPort: 8080
@@ -40,11 +40,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: ipfs-metadata
+  name: ipfs
 spec:
   type: LoadBalancer
   selector:
-    app: ipfs-metadata
+    app: ipfs
   ports:
     - protocol: TCP
       port: 8080
