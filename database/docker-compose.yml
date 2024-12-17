@@ -1,0 +1,128 @@
+networks:
+  database_network:
+    name: database_network
+
+services:
+  ipfs-primary-0:
+    image: 'bitnami/postgresql-repmgr:11.16.0'
+    networks:
+      - database_network
+    ports:
+      - target: 5432
+        published: 5436
+        protocol: tcp
+        mode: host
+    volumes:
+      - repmgr_ipfs_0_data:/bitnami/postgresql
+      - ./db-bckp:/tmp/db-bckp
+    environment:
+      - REPMGR_PRIMARY_HOST=ipfs-primary-0
+      - REPMGR_NODE_NETWORK_NAME=ipfs-primary-0
+      - REPMGR_PARTNER_NODES=ipfs-primary-0
+      - REPMGR_NODE_NAME=ipfs-primary-0
+      - REPMGR_NODE_ID=1001
+      - REPMGR_PGHBA_TRUST_ALL=yes
+      - REPMGR_NODE_PRIORITY=100
+      - POSTGRESQL_USERNAME=${POSTGRESQL_USERNAME}
+      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
+      - POSTGRESQL_DATABASE=${POSTGRESQL_DATABASE}
+      - PG_READONLY_USER=${PG_READONLY_USER}
+      - PG_READONLY_PASSWORD=${PG_READONLY_PASSWORD}
+      - REPMGR_USERNAME=${REPMGR_USERNAME}
+      - REPMGR_PASSWORD=${REPMGR_PASSWORD}
+      - POSTGRESQL_USERNAME=IPFS_USER
+      - POSTGRESQL_PASSWORD=IPFS_PASS
+      - POSTGRESQL_DATABASE=IPFS_DB
+      - PG_READONLY_USER=IPFS_READONLY
+      - PG_READONLY_PASSWORD=IPFS_READONLY_PASS
+      - REPMGR_USERNAME=repmgr
+      - REPMGR_PASSWORD=IPFS_REP_PASS
+
+
+  ipfs-primary-1:
+    image: 'bitnami/postgresql-repmgr:11.16.0'
+    depends_on:
+      - ipfs-primary-0
+    networks:
+      - database_network
+    ports:
+      - target: 5432
+        published: 5437
+        protocol: tcp
+        mode: host
+    volumes:
+      - repmgr_ipfs_1_data:/bitnami/postgresql
+    environment:
+      - REPMGR_PRIMARY_HOST=ipfs-primary-0
+      - REPMGR_PARTNER_NODES=ipfs-primary-0,ipfs-primary-1
+      - REPMGR_NODE_NAME=ipfs-primary-1
+      - REPMGR_NODE_NETWORK_NAME=ipfs-primary-1
+      - REPMGR_NODE_ID=1002
+      - REPMGR_PGHBA_TRUST_ALL=yes
+      - REPMGR_NODE_PRIORITY=99
+      - POSTGRESQL_USERNAME=${POSTGRESQL_USERNAME}
+      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
+      - POSTGRESQL_DATABASE=${POSTGRESQL_DATABASE}
+      - PG_READONLY_USER=${PG_READONLY_USER}
+      - PG_READONLY_PASSWORD=${PG_READONLY_PASSWORD}
+      - REPMGR_USERNAME=${REPMGR_USERNAME}
+      - REPMGR_PASSWORD=${REPMGR_PASSWORD}
+      - POSTGRESQL_USERNAME=IPFS_USER
+      - POSTGRESQL_PASSWORD=IPFS_PASS
+      - POSTGRESQL_DATABASE=IPFS_DB
+      - PG_READONLY_USER=IPFS_READONLY
+      - PG_READONLY_PASSWORD=IPFS_READONLY_PASS
+      - REPMGR_USERNAME=repmgr
+      - REPMGR_PASSWORD=IPFS_REP_PASS
+
+  ipfs-pgpool:
+    image: bitnami/pgpool:4.3.3
+    depends_on:
+      - ipfs-primary-0
+      - ipfs-primary-1
+    networks:
+      - database_network
+    ports:
+      - target: 5432
+        published: 5433
+        protocol: tcp
+        mode: host
+    environment:
+      - PGPOOL_BACKEND_NODES=0:ipfs-primary-0,1:ipfs-primary-1
+      - PGPOOL_ENABLE_LDAP=no
+      - PGPOOL_NUM_INIT_CHILDREN=225
+      - PGPOOL_MAX_POOL=1
+      - PGPOOL_ENABLE_LOG_PER_NODE_STATEMENT=yes
+      - PGPOOL_ENABLE_LOG_CONNECTIONS=yes
+      - PGPOOL_ENABLE_LOG_HOSTNAME=yes
+      - PGPOOL_CHILD_LIFE_TIME=2
+      - PGPOOL_CONNECTION_LIFE_TIME=2
+      - PGPOOL_CLIENT_IDLE_LIMIT=2
+      - PGPOOL_SR_CHECK_USER=${PGPOOL_SR_CHECK_USER}
+      - PGPOOL_SR_CHECK_PASSWORD=${PGPOOL_SR_CHECK_PASSWORD}
+      - POSTGRESQL_USERNAME=${POSTGRESQL_USERNAME}
+      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
+      - PGPOOL_POSTGRES_USERNAME=${PGPOOL_POSTGRES_USERNAME}
+      - PGPOOL_POSTGRES_PASSWORD=${PGPOOL_POSTGRES_PASSWORD}
+      - PGPOOL_ADMIN_USERNAME=${PGPOOL_ADMIN_USERNAME}
+      - PGPOOL_ADMIN_PASSWORD=${PGPOOL_ADMIN_PASSWORD}
+      - PGPOOL_PARAMS_SR_CHECK_USER=${PGPOOL_PARAMS_SR_CHECK_USER}
+      - PGPOOL_PARAMS_SR_CHECK_PASSWORD=${PGPOOL_PARAMS_SR_CHECK_PASSWORD}
+      - PGPOOL_SR_CHECK_USER=repmgr
+      - PGPOOL_SR_CHECK_PASSWORD=IPFS_REP_PASS
+      - POSTGRESQL_USERNAME=IPFS_USER
+      - POSTGRESQL_PASSWORD=IPFS_PASS
+      - PGPOOL_POSTGRES_USERNAME=IPFS_USER
+      - PGPOOL_POSTGRES_PASSWORD=IPFS_PASS
+      - PGPOOL_ADMIN_USERNAME=IPFS_USER
+      - PGPOOL_ADMIN_PASSWORD=IPFS_PASS
+      - PGPOOL_PARAMS_SR_CHECK_USER=IPFS_USER
+      - PGPOOL_PARAMS_SR_CHECK_PASSWORD=IPFS_PASS
+    volumes:
+      - pgpool_ipfs_data:/bitnami/pgpool
+
+###########################
+volumes:
+  repmgr_ipfs_0_data:
+  repmgr_ipfs_1_data:
+  pgpool_ipfs_data:
