@@ -32,6 +32,11 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
+    - name: Create ECR repository if it doesn't exist
+      run: |
+        aws ecr describe-repositories --repository-names ${{ secrets.ECR_REPOSITORY_NAME }} || \
+        aws ecr create-repository --repository-name ${{ secrets.ECR_REPOSITORY_NAME }}
+
     - name: Log in to Amazon ECR
       id: ecr-login
       uses: aws-actions/amazon-ecr-login@v1
@@ -47,5 +52,5 @@ jobs:
         echo "Building Docker image ipfs-metadata:${IMAGE_TAG}"
         docker build -t ipfs-metadata:${IMAGE_TAG} -f Dockerfile .
         echo "Tagging Docker image"
-        docker tag ipfs-metadata:latest 339713100066.dkr.ecr.us-east-1.amazonaws.com/ipfs-metadata:latest
-        docker push 339713100066.dkr.ecr.us-east-1.amazonaws.com/ipfs-metadata:latest
+        docker tag ipfs-metadata:latest ${{ steps.ecr-login.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
+        docker push ${{ steps.ecr-login.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
