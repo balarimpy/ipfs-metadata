@@ -66,5 +66,5 @@ jobs:
       run: |
         echo "Updating 2 Kubernetes deployment with image $ECR_REGISTRY/$ECR_REPOSITORY:${IMAGE_TAG}"
         aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ steps.ecr-login.outputs.registry }}
-        kubectl set image deployment/ipfs-metadata ipfs-metadata=${{ steps.ecr-login.outputs.registry }}/ipfs-metadata:latest
+        kubectl set image deployment/ipfs-metadata ipfs-metadata=${{ steps.ecr-login.outputs.registry }}/ipfs:latest
         kubectl rollout restart deployment ipfs-metadata        
