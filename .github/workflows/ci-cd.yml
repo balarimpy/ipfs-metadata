@@ -13,6 +13,9 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+    - name: List files (for debugging)
+      run: ls -R
+
     - name: Install AWS CLI
       run: |
         sudo apt-get update
@@ -41,10 +44,8 @@ jobs:
         ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
         IMAGE_TAG: latest
       run: |
-        echo "Building 2 Docker image ipfs-metadata:${IMAGE_TAG}"
+        echo "Building Docker image ipfs-metadata:${IMAGE_TAG}"
         docker build -t ipfs-metadata:${IMAGE_TAG} -f server/Dockerfile server/
         echo "Tagging Docker image"
         docker tag ipfs-metadata:latest 339713100066.dkr.ecr.us-east-1.amazonaws.com/ipfs-metadata:latest
         docker push 339713100066.dkr.ecr.us-east-1.amazonaws.com/ipfs-metadata:latest
-
-     
