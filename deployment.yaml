@@ -18,22 +18,22 @@ spec:
         ports:
         - containerPort: 8080
         env:
-        - name: DB_HOST
-          value: "your-rds-endpoint.amazonaws.com"
-        - name: DB_PORT
+        - name: POSTGRES_HOST
+          value: "ipfs-db.cdawsswo2q7v.us-east-1.rds.amazonaws.com"
+        - name: POSTGRES_PORT
           value: "5432"
-        - name: DB_USER
+        - name: POSTGRES_USER
           valueFrom:
             secretKeyRef:
               name: rds-db-credentials
               key: username
-        - name: DB_PASSWORD
+        - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
               name: rds-db-credentials
               key: password
-        - name: DB_NAME
-          value: "your-database-name"        
+        - name: POSTGRES_DB
+          value: "ipfs_db"        
 
 ---
 
