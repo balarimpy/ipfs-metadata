@@ -38,18 +38,6 @@ spec:
         - name: env-volume
           mountPath: /app/.env # Adjusted mount path
           subPath: .env
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 8080
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 8080
-          initialDelaySeconds: 15
-          periodSeconds: 20
       volumes:
       - name: env-volume
         configMap:
