@@ -63,7 +63,7 @@ metadata:
   name: ipfs-env
 data:
   .env: |
-    POSTGRES_HOST=my-postgres-db.cdawsswo2q7v.us-east-1.rds.amazonaws.com
+    POSTGRES_HOST=ipfs-demo.cdawsswo2q7v.us-east-1.rds.amazonaws.com
     POSTGRES_PORT=5432
     POSTGRES_DB=ipfs_db
 
