@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: ipfs
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: ipfs
@@ -19,7 +19,7 @@ spec:
         - containerPort: 8080
         env:
         - name: POSTGRES_HOST
-          value: "ipfs-db.cdawsswo2q7v.us-east-1.rds.amazonaws.com"
+          value: "my-postgres-db.cdawsswo2q7v.us-east-1.rds.amazonaws.com"
         - name: POSTGRES_PORT
           value: "5432"
         - name: POSTGRES_USER
@@ -33,7 +33,39 @@ spec:
               name: rds-db-credentials
               key: password
         - name: POSTGRES_DB
-          value: "ipfs_db"        
+          value: "ipfs_db"
+        volumeMounts:
+        - name: env-volume
+          mountPath: /app/.env # Adjusted mount path
+          subPath: .env
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 20
+      volumes:
+      - name: env-volume
+        configMap:
+          name: ipfs-env
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ipfs-env
+data:
+  .env: |
+    POSTGRES_HOST=my-postgres-db.cdawsswo2q7v.us-east-1.rds.amazonaws.com
+    POSTGRES_PORT=5432
+    POSTGRES_DB=ipfs_db
 
 ---
 
@@ -47,16 +79,16 @@ spec:
     app: ipfs
   ports:
     - protocol: TCP
-      port: 8080
+      port: 80
       targetPort: 8080
 
-
 ---
+
 apiVersion: v1
 kind: Secret
 metadata:
   name: rds-db-credentials
 type: Opaque
 data:
-  username: aXBmc191c2Vy
-  password: aXBmc19wYXNz     
+  username: aXBmc191c2Vy 
+  password: aXBmc19wYXNz 
